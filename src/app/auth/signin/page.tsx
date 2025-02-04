@@ -13,6 +13,7 @@ export default function SignIn() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isLoading, error, mfaRequired } = useAppSelector((state) => state.auth);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -31,9 +32,11 @@ export default function SignIn() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setIsRedirecting(true);
       await dispatch(signInWithPassword(formData)).unwrap();
       router.push('/dashboard');
     } catch (err: any) {
+      setIsRedirecting(false);
       if (err.includes('Email not confirmed')) {
         toast.error(
           'Please verify your email before signing in. Check your inbox for the verification link.'
@@ -73,12 +76,14 @@ export default function SignIn() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isRedirecting) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100">
         <div className="animate-pulse text-center">
           <div className="h-12 w-12 mx-auto rounded-full bg-blue-400"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">
+            {isRedirecting ? 'Redirecting to dashboard...' : 'Loading...'}
+          </p>
         </div>
       </div>
     );
