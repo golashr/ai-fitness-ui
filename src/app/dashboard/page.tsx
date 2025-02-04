@@ -31,8 +31,8 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 p-8 flex items-center justify-center">
-        <div className="animate-pulse text-white">Loading...</div>
+      <div className="min-h-screen bg-gray-100 p-8 flex items-center justify-center text-gray-700">
+        <div className="animate-pulse text-gray-900">Loading...</div>
       </div>
     );
   }
@@ -42,9 +42,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-2xl font-bold mb-4 text-white">AI Fitness Dashboard</h1>
-      <p className="text-gray-300">Welcome {userDetails?.name || userDetails?.email}</p>
+    <div className="min-h-screen bg-gray-100 p-8 text-gray-900">
+      <h1 className="text-2xl font-bold mb-4 text-gray-900">AI Fitness Dashboard</h1>
+      <p className="text-gray-900">Welcome {userDetails?.name || userDetails?.email}</p>
     </div>
   );
 }
