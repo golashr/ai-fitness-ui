@@ -4,11 +4,9 @@ import { useEffect } from 'react';
 import { useAppDispatch } from '@/redux/hooks';
 import { supabase } from '@/lib/supabase';
 import { setSession, clearSession } from '@/redux/features/sessionSlice';
-import { useRouter } from 'next/navigation';
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
-  const router = useRouter();
 
   console.log('SessionProvider mounted');
 

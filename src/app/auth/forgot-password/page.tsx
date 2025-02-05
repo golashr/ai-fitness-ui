@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
 import { requestPasswordReset } from '@/redux/features/auth';
-import { useRouter } from 'next/navigation';
-import { toast } from 'react-hot-toast';
+import toast from 'react-hot-toast';
+import { AuthError } from '@supabase/supabase-js';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -13,18 +14,29 @@ export default function ForgotPassword() {
   const router = useRouter();
   const { isLoading, error } = useSelector((state: RootState) => state.auth);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await dispatch(requestPasswordReset(email));
-    // Show success message and redirect
-    toast.success(
-      'If an account exists with this email, you will receive password reset instructions.'
-    );
-    router.push('/auth/signin');
+    try {
+      await dispatch(requestPasswordReset(email)).unwrap();
+      toast.success(
+        'If an account exists with this email, you will receive password reset instructions.'
+      );
+      router.push('/auth/signin');
+    } catch (error) {
+      if (error instanceof AuthError) {
+        toast.error(error.message);
+      } else if (error instanceof Error) {
+        toast.error(error.message);
+      } else if (typeof error === 'string') {
+        toast.error(error);
+      } else {
+        toast.error('Failed to send reset instructions');
+      }
+    }
   };
-  //flex min-h-screen items-center justify-center bg-gray-100
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center  bg-gray-100 p-24">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-24">
       <div className="w-full max-w-md space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
@@ -43,7 +55,7 @@ export default function ForgotPassword() {
               required
               className="mt-1 block w-full rounded-md border border-gray-900 p-2 text-gray-900"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
             />
           </div>
           {error && <div className="text-red-500 text-sm">{error}</div>}

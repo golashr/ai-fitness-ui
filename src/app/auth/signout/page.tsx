@@ -2,12 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/redux/store';
-import { supabase } from '@/lib/supabase';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/redux/store';
 import { useAppSelector } from '@/redux/hooks';
 import toast from 'react-hot-toast';
 import { setError, signOut } from '@/redux/features/auth';
+import { AuthError } from '@supabase/supabase-js';
 
 export default function SignOut() {
   const router = useRouter();
@@ -17,17 +17,23 @@ export default function SignOut() {
 
   useEffect(() => {
     if (!session) {
-      router.push('/auth/signin'); // Changed from "/" to "/auth/signin"
+      router.push('/auth/signin');
     }
   }, [session, router]);
 
   const handleSignOut = async () => {
     try {
-      dispatch(signOut());
+      await dispatch(signOut()).unwrap();
       toast.success('Successfully signed out');
-      router.push('/auth/signin'); // Changed from "/" to "/auth/signin"
-    } catch (err: any) {
-      dispatch(setError(err.message || 'Failed to sign out'));
+      router.push('/auth/signin');
+    } catch (error) {
+      if (error instanceof AuthError) {
+        dispatch(setError(error.message));
+      } else if (error instanceof Error) {
+        dispatch(setError(error.message));
+      } else {
+        dispatch(setError('Failed to sign out'));
+      }
     }
   };
 

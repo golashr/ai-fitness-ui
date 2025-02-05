@@ -3,24 +3,25 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { signInWithPassword, verifyOTP, setError, signOut } from '@/redux/features/auth';
+import { signInWithPassword, setError, signOut } from '@/redux/features/auth';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
+import { AuthError } from '@supabase/supabase-js';
 
 export default function SignIn() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isLoading, error, mfaRequired } = useAppSelector((state) => state.auth);
+  const { isLoading, error } = useAppSelector((state) => state.auth);
   const { session } = useAppSelector((state) => state.session);
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isRedirecting] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  const [otpCode, setOtpCode] = useState('');
+  // const [otpCode] = useState('');
 
   // Clear any existing session when landing on signin
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function SignIn() {
       // Clear both auth and session states
       dispatch(signOut());
     }
-  }, []);
+  }, [dispatch, session]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -44,28 +45,28 @@ export default function SignIn() {
       await dispatch(signInWithPassword(formData)).unwrap();
       toast.success('Successfully signed in');
       router.push('/dashboard');
-    } catch (err: any) {
-      if (err.includes('network') || err.includes('system')) {
+    } catch (err) {
+      if (typeof err === 'string' && (err.includes('network') || err.includes('system'))) {
         toast.error(err);
       }
     }
   };
 
-  const handleOTPSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await dispatch(verifyOTP({ email: formData.email, token: otpCode })).unwrap();
-      toast.success('Successfully signed in!');
-      router.push('/dashboard');
-    } catch (err: any) {
-      console.log(`handleOTPSubmit error: ${err}`);
-      dispatch(setError(err.message));
-    }
-  };
+  // const handleOTPSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     await dispatch(verifyOTP({ email: formData.email, token: otpCode })).unwrap();
+  //     toast.success('Successfully signed in!');
+  //     router.push('/dashboard');
+  //   } catch (err: any) {
+  //     console.log(`handleOTPSubmit error: ${err}`);
+  //     dispatch(setError(err.message));
+  //   }
+  // };
 
   const handleGoogleSignIn = async () => {
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
@@ -73,8 +74,12 @@ export default function SignIn() {
       });
 
       if (error) throw error;
-    } catch (err: any) {
-      dispatch(setError(err.message));
+    } catch (err) {
+      if (err instanceof AuthError) {
+        dispatch(setError(err.message));
+      } else {
+        dispatch(setError('An unexpected error occurred'));
+      }
     }
   };
 
@@ -164,7 +169,7 @@ export default function SignIn() {
         </button>
 
         <p className="mt-4 text-center text-sm text-gray-600">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/auth/signup" className="text-blue-600 hover:text-blue-800">
             Sign up
           </Link>

@@ -1,11 +1,10 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import { useAppSelector } from "@/redux/hooks";
-import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAppSelector } from '@/redux/hooks';
+import Image from 'next/image';
+import { useState, useRef, useEffect } from 'react';
 
 export default function Header() {
   const router = useRouter();
@@ -25,7 +24,7 @@ export default function Header() {
   }, []);
 
   const handleSignOut = () => {
-    router.push("/auth/signout");
+    router.push('/auth/signout');
     setIsDropdownOpen(false);
   };
 
@@ -101,4 +100,4 @@ export default function Header() {
       </nav>
     </header>
   );
-} 
+}

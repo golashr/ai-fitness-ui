@@ -6,6 +6,7 @@ import { AppDispatch, RootState } from '@/redux/store';
 import { resetPassword, setError, signOut } from '@/redux/features/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import { AuthError } from '@supabase/supabase-js';
 
 export default function ResetPasswordSection() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -24,7 +25,6 @@ export default function ResetPasswordSection() {
 
     try {
       const result = await dispatch(resetPassword(newPassword)).unwrap();
-
       if (result) {
         toast.success('Password updated successfully. Please log in again.');
 
@@ -34,9 +34,12 @@ export default function ResetPasswordSection() {
         // Redirect to login page
         router.push('/auth/signin');
       }
-    } catch (error: any) {
-      dispatch(setError(error.message || 'Failed to update password'));
-      console.log('Password update failed:', error);
+    } catch (error) {
+      if (error instanceof AuthError) {
+        dispatch(setError(error.message || 'Failed to update password'));
+      } else if (error instanceof Error) {
+        console.log('Password update failed:', error);
+      }
     }
   };
 

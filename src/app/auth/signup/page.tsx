@@ -1,20 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { signUpWithPassword, resendVerificationEmail } from '@/redux/features/auth';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import type { SignInCredentials } from '@/redux/features/auth/types';
 
 export default function SignUp() {
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const { isLoading, error, requiresEmailVerification, email } = useAppSelector(
     (state) => state.auth
   );
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<SignInCredentials>({
     email: '',
     password: '',
     name: '',
@@ -33,8 +32,14 @@ export default function SignUp() {
     try {
       await dispatch(signUpWithPassword(formData)).unwrap();
       toast.success('Sign up successful! Please check your email to verify your account.');
-    } catch (err: any) {
-      toast.error(err || 'Failed to sign up');
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else if (typeof error === 'string') {
+        toast.error(error);
+      } else {
+        toast.error('Failed to register');
+      }
     }
   };
 
@@ -45,13 +50,18 @@ export default function SignUp() {
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
             <h2 className="text-center text-2xl font-bold text-gray-900 mb-4">Verify Your Email</h2>
             <p className="text-center text-gray-600">
-              We've sent a verification link to <strong>{email}</strong>. Please check your email
-              and click the link to verify your account.
+              We&apos;ve sent a verification link to <strong>{email}</strong>. Please check your
+              email and click the link to verify your account.
             </p>
             <p className="mt-4 text-center text-sm text-gray-600">
-              Didn't receive the email?{' '}
+              Didn&apos;t receive the email?{' '}
               <button
-                onClick={() => dispatch(resendVerificationEmail(email!))}
+                onClick={() => {
+                  if (email) {
+                    dispatch(resendVerificationEmail(email));
+                    toast.success('Verification email resent');
+                  }
+                }}
                 className="text-blue-600 hover:text-blue-800"
               >
                 Resend verification email

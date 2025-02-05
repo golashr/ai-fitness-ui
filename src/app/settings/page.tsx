@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { setupTOTP, verifyTOTP } from '@/redux/features/auth';
+import { setupTOTP, verifyTOTP } from '@/redux/features/auth/thunks';
 import toast from 'react-hot-toast';
+import { AuthError } from '@supabase/supabase-js';
 import ResetPasswordSection from './components/ResetPasswordSection';
+import Image from 'next/image';
 
 export default function Settings() {
   const dispatch = useAppDispatch();
@@ -15,19 +17,33 @@ export default function Settings() {
     try {
       await dispatch(setupTOTP()).unwrap();
       toast.success('Scan the QR code with your authenticator app');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to setup MFA');
+    } catch (error) {
+      if (error instanceof AuthError) {
+        toast.error(error.message);
+      } else if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to setup MFA');
+      }
     }
   };
 
-  const handleVerifyMFA = async (e: React.FormEvent) => {
+  const handleVerifyMFA = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       await dispatch(verifyTOTP({ code: verificationCode })).unwrap();
       toast.success('MFA setup successful!');
-    } catch (err: any) {
-      console.log(`handleVerifyMFA error: ${err}`);
-      toast.error(err.message || 'Invalid verification code');
+    } catch (error) {
+      console.log(`handleVerifyMFA error:`, error);
+      if (error instanceof AuthError) {
+        toast.error(error.message);
+      } else if (error instanceof Error) {
+        toast.error(error.message);
+      } else if (typeof error === 'string') {
+        toast.error(error);
+      } else {
+        toast.error('Invalid verification code');
+      }
     }
   };
 
@@ -61,13 +77,17 @@ export default function Settings() {
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">1. Scan QR Code</h3>
                 <p className="text-gray-600 mb-4">
-                  Scan this QR code with your authenticator app (e.g., Google Authenticator)
+                  Scan this QR code with your authenticator app (like Google Authenticator or
+                  Authy).
                 </p>
-                <div className="bg-gray-100 p-4 rounded-lg inline-block">
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: decodeURIComponent(totpQR.replace('data:image/svg+xml;utf-8,', '')),
-                    }}
+                <div className="w-64 h-64 mx-auto relative">
+                  <Image
+                    src={totpQR}
+                    alt="QR Code"
+                    fill
+                    className="object-contain"
+                    unoptimized
+                    priority
                   />
                 </div>
               </div>
@@ -77,20 +97,27 @@ export default function Settings() {
                   2. Enter Verification Code
                 </h3>
                 <form onSubmit={handleVerifyMFA} className="space-y-4">
-                  <input
-                    type="text"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    placeholder="Enter 6-digit code"
-                    className="w-full px-3 py-2 border border-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
-                    required
-                  />
+                  <div>
+                    <label htmlFor="code" className="block text-sm font-medium text-gray-700">
+                      Verification Code
+                    </label>
+                    <input
+                      type="text"
+                      id="code"
+                      value={verificationCode}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setVerificationCode(e.target.value)
+                      }
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
                   <button
                     type="submit"
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+                    className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Verifying...' : 'Verify & Enable 2FA'}
+                    Verify
                   </button>
                 </form>
               </div>

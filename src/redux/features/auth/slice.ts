@@ -62,11 +62,13 @@ const authSlice = createSlice({
       .addCase(signInWithPassword.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSignedUp = true;
-        state.user = {
-          id: action.payload.user.id,
-          name: action.payload.user.user_metadata.name,
-          email: action.payload.user.email!,
-        };
+        state.user = action.payload.user
+          ? {
+              id: action.payload.user.id,
+              name: action.payload.user.user_metadata.name,
+              email: action.payload.user.email!,
+            }
+          : null;
         state.requiresEmailVerification = false;
         state.error = null;
       })
@@ -76,7 +78,7 @@ const authSlice = createSlice({
         state.email = null;
         state.error = action.payload as string;
       })
-      .addCase(signOut.fulfilled, (state) => {
+      .addCase(signOut.fulfilled, () => {
         return initialState;
       })
       .addCase(resetPassword.pending, (state) => {
