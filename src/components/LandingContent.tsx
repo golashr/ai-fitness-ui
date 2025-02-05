@@ -11,10 +11,10 @@ export default function LandingContent() {
       </p>
       <div className="flex gap-4">
         <Link
-          href="/register"
+          href="/auth/signup"
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          Register
+          Sign up
         </Link>
         <Link
           href="/auth/signin"

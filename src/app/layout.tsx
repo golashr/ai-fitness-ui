@@ -10,7 +10,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen">
         <Providers>
           <ClientLayout>{children}</ClientLayout>
-          <Toaster position="top-center" />
         </Providers>
       </body>
     </html>

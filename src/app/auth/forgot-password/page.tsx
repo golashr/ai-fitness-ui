@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { requestPasswordReset } from '@/redux/features/authSlice';
+import { requestPasswordReset } from '@/redux/features/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 

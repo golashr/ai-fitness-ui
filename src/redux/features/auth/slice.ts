@@ -1,12 +1,25 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { AuthState } from './types';
-import { signInWithPassword, signOut, resetPassword } from './thunks';
+import {
+  signInWithPassword,
+  signOut,
+  resetPassword,
+  resendVerificationEmail,
+  signUpWithPassword,
+} from './thunks';
 
-const initialState: AuthState = {
+export const initialState: AuthState = {
   user: null,
   isLoading: false,
   error: null,
+  requiresEmailVerification: false,
+  isSignedUp: false,
   mfaRequired: false,
+  email: null,
+  totpSecret: undefined,
+  totpQR: undefined,
+  isMFAEnabled: false,
+  resetPasswordSuccess: false,
 };
 
 const authSlice = createSlice({
@@ -22,25 +35,50 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Sign In
+      .addCase(signUpWithPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.requiresEmailVerification = false;
+        state.email = null;
+      })
+      .addCase(signUpWithPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSignedUp = true;
+        state.requiresEmailVerification = true;
+        state.email = action.payload.email!;
+        state.user = null;
+        state.error = null;
+      })
+      .addCase(signUpWithPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.requiresEmailVerification = false;
+        state.email = null;
+      })
       .addCase(signInWithPassword.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
       .addCase(signInWithPassword.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload.user;
+        state.isSignedUp = true;
+        state.user = {
+          id: action.payload.user.id,
+          name: action.payload.user.user_metadata.name,
+          email: action.payload.user.email!,
+        };
+        state.requiresEmailVerification = false;
+        state.error = null;
       })
       .addCase(signInWithPassword.rejected, (state, action) => {
         state.isLoading = false;
+        state.user = null;
+        state.email = null;
         state.error = action.payload as string;
       })
-      // Sign Out
       .addCase(signOut.fulfilled, (state) => {
-        state.user = null;
-        state.error = null;
+        return initialState;
       })
-      // Reset Password
       .addCase(resetPassword.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -52,8 +90,19 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      .addCase(resendVerificationEmail.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resendVerificationEmail.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(resendVerificationEmail.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
-    // Add other cases for verifyOTP, setupTOTP, etc.
   },
 });
 

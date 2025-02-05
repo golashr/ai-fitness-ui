@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { setupTOTP, verifyTOTP } from '@/redux/features/authSlice';
+import { setupTOTP, verifyTOTP } from '@/redux/features/auth';
 import toast from 'react-hot-toast';
-import Image from 'next/image';
 import ResetPasswordSection from './components/ResetPasswordSection';
 
 export default function Settings() {

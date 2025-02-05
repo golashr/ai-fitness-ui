@@ -105,3 +105,76 @@ src/
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details
+
+## Planned Features & Improvements
+
+### Enhanced Authentication
+
+- [ ] Email Verification Flow
+
+  - Custom verification page
+  - Resend verification email functionality
+  - Better error handling and user feedback
+
+- [ ] TOTP-based MFA
+
+  - QR code generation
+  - TOTP setup workflow
+  - Backup codes generation
+  - MFA recovery process
+
+- [ ] SMS-based Advanced MFA (requires Supabase Pro)
+  - Phone number verification
+  - SMS code delivery
+  - Fallback mechanisms
+  - Recovery options
+
+### Future Improvements
+
+- [ ] Session management improvements
+- [ ] Better loading states and transitions
+- [ ] Enhanced error handling
+- [ ] Comprehensive test coverage
+- [ ] Performance optimizations
+
+## Authentication Flow
+
+### Sign Up Process
+
+1. Initial User Signup
+
+   - User submits signup form (email, password, name)
+   - Create auth user in Supabase
+   - Send verification email
+   - Show verification screen
+   - No profile creation at this stage
+
+2. Email Verification
+
+   - User receives verification email
+   - Clicks verification link
+   - Redirected to signin page
+   - Auth record is marked as verified (confirmed_at is set)
+
+3. First Sign In (Post Verification)
+   - User signs in with credentials
+   - System checks for existing profile
+   - If no profile exists:
+     - Create user profile
+     - Store additional user data
+   - Redirect to dashboard
+
+### Benefits
+
+- Clean separation between auth and profile creation
+- Ensures profiles only exist for verified users
+- No orphaned profile records
+- Simplified RLS policies
+- Better data integrity
+- Reduced complexity in signup flow
+
+### States
+
+- Unverified: Auth record exists, no profile
+- Verified: Auth record confirmed, profile created
+- Complete: User fully onboarded

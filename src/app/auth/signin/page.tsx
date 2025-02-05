@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { signInWithPassword, verifyOTP, setError } from '@/redux/features/authSlice';
+import { signInWithPassword, verifyOTP, setError, signOut } from '@/redux/features/auth';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
@@ -13,6 +13,7 @@ export default function SignIn() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isLoading, error, mfaRequired } = useAppSelector((state) => state.auth);
+  const { session } = useAppSelector((state) => state.session);
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -20,6 +21,14 @@ export default function SignIn() {
     password: '',
   });
   const [otpCode, setOtpCode] = useState('');
+
+  // Clear any existing session when landing on signin
+  useEffect(() => {
+    if (session) {
+      // Clear both auth and session states
+      dispatch(signOut());
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -32,17 +41,12 @@ export default function SignIn() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setIsRedirecting(true);
       await dispatch(signInWithPassword(formData)).unwrap();
+      toast.success('Successfully signed in');
       router.push('/dashboard');
     } catch (err: any) {
-      setIsRedirecting(false);
-      if (err.includes('Email not confirmed')) {
-        toast.error(
-          'Please verify your email before signing in. Check your inbox for the verification link.'
-        );
-      } else {
-        toast.error(err || 'Failed to sign in');
+      if (err.includes('network') || err.includes('system')) {
+        toast.error(err);
       }
     }
   };
@@ -55,7 +59,6 @@ export default function SignIn() {
       router.push('/dashboard');
     } catch (err: any) {
       console.log(`handleOTPSubmit error: ${err}`);
-      toast.error(err.message || 'Invalid verification code');
       dispatch(setError(err.message));
     }
   };
@@ -71,7 +74,6 @@ export default function SignIn() {
 
       if (error) throw error;
     } catch (err: any) {
-      toast.error(err.message || 'Failed to sign in with Google');
       dispatch(setError(err.message));
     }
   };
@@ -125,7 +127,11 @@ export default function SignIn() {
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && (
+            <div className="text-red-500 text-sm mt-2" role="alert">
+              {error}
+            </div>
+          )}
 
           <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
             Forgot your password?
@@ -159,8 +165,8 @@ export default function SignIn() {
 
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{' '}
-          <Link href="/register" className="text-blue-600 hover:text-blue-800">
-            Register
+          <Link href="/auth/signup" className="text-blue-600 hover:text-blue-800">
+            Sign up
           </Link>
         </p>
       </div>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/redux/store';
-import { resetPassword, signOut } from '@/redux/features/authSlice';
+import { resetPassword, setError, signOut } from '@/redux/features/auth';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
@@ -18,25 +18,25 @@ export default function ResetPasswordSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      toast.error('New passwords do not match');
+      dispatch(setError('New passwords do not match'));
       return;
     }
 
     try {
       const result = await dispatch(resetPassword(newPassword)).unwrap();
-      
+
       if (result) {
         toast.success('Password updated successfully. Please log in again.');
-        
+
         // Sign out the user
         await dispatch(signOut());
-        
+
         // Redirect to login page
         router.push('/auth/signin');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update password');
-      console.error('Password update failed:', error);
+      dispatch(setError(error.message || 'Failed to update password'));
+      console.log('Password update failed:', error);
     }
   };
 
@@ -45,7 +45,10 @@ export default function ResetPasswordSection() {
       <h3 className="text-xl font-semibold text-gray-900 mb-6">Change Password</h3>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="current-password"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Current Password
           </label>
           <input
@@ -71,7 +74,10 @@ export default function ResetPasswordSection() {
           />
         </div>
         <div>
-          <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="confirm-password"
+            className="block text-sm font-medium text-gray-700 mb-2"
+          >
             Confirm New Password
           </label>
           <input
@@ -83,11 +89,7 @@ export default function ResetPasswordSection() {
             required
           />
         </div>
-        {error && (
-          <div className="text-red-500 text-sm bg-red-50 p-3 rounded-md">
-            {error}
-          </div>
-        )}
+        {error && <div className="text-red-500 text-sm bg-red-50 p-3 rounded-md">{error}</div>}
         <button
           type="submit"
           disabled={isLoading}
@@ -98,4 +100,4 @@ export default function ResetPasswordSection() {
       </form>
     </div>
   );
-} 
+}
