@@ -2,22 +2,21 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/redux/store';
-import { useAppSelector } from '@/redux/hooks';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import toast from 'react-hot-toast';
-import { setError, signOut } from '@/redux/features/auth';
+import { signOut } from '@/redux/features/auth';
 import { AuthError } from '@supabase/supabase-js';
 
 export default function SignOut() {
   const router = useRouter();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   const { session } = useAppSelector((state) => state.session);
+  const { isLoading } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (!session) {
-      router.push('/auth/signin');
+      router.replace('/auth/signin');
     }
   }, [session, router]);
 
@@ -25,14 +24,14 @@ export default function SignOut() {
     try {
       await dispatch(signOut()).unwrap();
       toast.success('Successfully signed out');
-      router.push('/auth/signin');
+      router.replace('/auth/signin');
     } catch (error) {
       if (error instanceof AuthError) {
-        dispatch(setError(error.message));
-      } else if (error instanceof Error) {
-        dispatch(setError(error.message));
+        toast.error(error.message);
+      } else if (typeof error === 'string') {
+        toast.error(error);
       } else {
-        dispatch(setError('Failed to sign out'));
+        toast.error('Failed to sign out');
       }
     }
   };
@@ -46,9 +45,10 @@ export default function SignOut() {
             <p className="text-gray-600 mb-6">Are you sure you want to sign out?</p>
             <button
               onClick={handleSignOut}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              disabled={isLoading}
+              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400"
             >
-              Sign Out
+              {isLoading ? 'Signing out...' : 'Sign Out'}
             </button>
           </>
         )}

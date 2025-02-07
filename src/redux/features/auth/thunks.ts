@@ -1,27 +1,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { supabase } from '@/lib/supabase';
-import type { SignInCredentials, OTPVerificationData } from './types';
-import type { Session, User } from '@supabase/supabase-js';
+import type { SignInCredentials, OTPVerificationData, RequestPasswordResponse } from './types';
 import { AuthError } from '@supabase/supabase-js';
 import { clearSession, setSession } from '../sessionSlice';
-import { initialState } from './slice';
-
-interface ThunkConfig {
-  rejectValue: string;
-}
-
-interface AuthResponse {
-  user: User | null;
-  session: Session | null;
-}
-
-interface TOTPVerifyResponse {
-  code: string;
-}
-
-interface ResetPasswordResponse {
-  success: boolean;
-}
+// import { initialState } from './slice';
+import { ThunkConfig, AuthResponse, ResetPasswordResponse, TOTPVerifyResponse } from './types';
+import { setLoading } from '@/redux/features/sessionSlice';
 
 export const signUpWithPassword = createAsyncThunk<
   { email: string | undefined; requiresEmailVerification: boolean },
@@ -29,25 +13,18 @@ export const signUpWithPassword = createAsyncThunk<
   ThunkConfig
 >('auth/registerUser', async ({ email, password, name }, { dispatch, rejectWithValue }) => {
   try {
+    dispatch(setLoading(true));
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { name },
-        emailRedirectTo: `${window.location.origin}/auth/signin`,
+        emailRedirectTo: `${window.location.origin}/auth/verify`,
       },
     });
 
-    if (error) {
-      console.error('Signup error:', error);
-      throw error;
-    }
-
-    if (!data.user) {
-      console.error('Sign up failed: No user data returned');
-      throw new Error('Sign up failed');
-    }
-
+    if (error) throw error;
+    if (!data.user) throw new Error('Sign up failed');
     if (data.user.identities?.length === 0) {
       throw new Error('Email already signed up');
     }
@@ -57,16 +34,17 @@ export const signUpWithPassword = createAsyncThunk<
     dispatch(clearSession());
 
     return {
-      ...initialState,
+      // ...initialState,
       email: data.user.email,
       requiresEmailVerification: true,
     };
   } catch (error) {
-    console.error('Signup error:', error);
-    if (error instanceof Error) {
+    if (error instanceof AuthError) {
       return rejectWithValue(error.message);
     }
-    return rejectWithValue('Failed to sign up with password');
+    return rejectWithValue('Failed to sign up');
+  } finally {
+    dispatch(setLoading(false));
   }
 });
 
@@ -76,16 +54,15 @@ export const signInWithPassword = createAsyncThunk<
   ThunkConfig
 >('auth/signInWithPassword', async ({ email, password }, { dispatch, rejectWithValue }) => {
   try {
-    const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+    dispatch(setLoading(true));
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (signInError) throw signInError;
-    if (!authData.user) throw new Error('Sign in failed: No user data');
-
-    // 2. Check if user is verified
-    if (!authData.user.confirmed_at) {
+    if (error) throw error;
+    if (!data.user) throw new Error('Sign in failed');
+    if (!data.user.confirmed_at) {
       throw new Error('Please verify your email before signing in');
     }
 
@@ -93,7 +70,7 @@ export const signInWithPassword = createAsyncThunk<
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', authData.user.id)
+      .eq('id', data.user.id)
       .single();
 
     // 4. Create profile if it doesn't exist
@@ -102,9 +79,9 @@ export const signInWithPassword = createAsyncThunk<
         .from('profiles')
         .insert([
           {
-            id: authData.user.id,
-            email: authData.user.email,
-            name: authData.user.user_metadata.name,
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.user_metadata.name,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
@@ -114,8 +91,8 @@ export const signInWithPassword = createAsyncThunk<
 
       if (createError) throw createError;
       return {
-        user: authData.user,
-        session: authData.session,
+        user: data.user,
+        session: data.session,
       };
     }
 
@@ -123,18 +100,19 @@ export const signInWithPassword = createAsyncThunk<
       throw profileError;
     }
 
-    dispatch(setSession(authData.session));
+    dispatch(setSession(data.session));
 
     return {
-      user: authData.user,
-      session: authData.session,
+      user: data.user,
+      session: data.session,
     };
   } catch (error) {
-    console.error('Sign in error:', error);
-    if (error instanceof Error) {
+    if (error instanceof AuthError) {
       return rejectWithValue(error.message);
     }
-    return rejectWithValue('Failed to sign in with password');
+    return rejectWithValue('Failed to sign in');
+  } finally {
+    dispatch(setLoading(false));
   }
 });
 
@@ -159,11 +137,13 @@ export const signOut = createAsyncThunk<boolean, void, ThunkConfig>(
   }
 );
 
-export const requestPasswordReset = createAsyncThunk<ResetPasswordResponse, string, ThunkConfig>(
-  'auth/requestPasswordReset',
+export const requestForgotPassword = createAsyncThunk<RequestPasswordResponse, string, ThunkConfig>(
+  'auth/requestForgotPassword',
   async (email: string, { rejectWithValue }) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
       if (error) throw error;
       return { success: true };
     } catch (error) {
@@ -175,12 +155,13 @@ export const requestPasswordReset = createAsyncThunk<ResetPasswordResponse, stri
   }
 );
 
-export const resetPassword = createAsyncThunk(
+export const resetPassword = createAsyncThunk<ResetPasswordResponse, string, ThunkConfig>(
   'auth/resetPassword',
-  async (password: string, { rejectWithValue }) => {
+  async (password: string, { dispatch, rejectWithValue }) => {
     try {
+      dispatch(setLoading(true));
       const { error } = await supabase.auth.updateUser({
-        password: password,
+        password,
       });
       if (error) throw error;
       return { message: 'Password updated successfully' };
@@ -188,10 +169,9 @@ export const resetPassword = createAsyncThunk(
       if (error instanceof AuthError) {
         return rejectWithValue(error.message);
       }
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
       return rejectWithValue('Failed to reset password');
+    } finally {
+      dispatch(setLoading(false));
     }
   }
 );

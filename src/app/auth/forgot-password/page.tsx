@@ -1,33 +1,44 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/redux/store';
-import { requestPasswordReset } from '@/redux/features/auth';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { requestForgotPassword, clearError } from '@/redux/features/auth';
 import toast from 'react-hot-toast';
-import { AuthError } from '@supabase/supabase-js';
+import Link from 'next/link';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const router = useRouter();
-  const { isLoading, error } = useSelector((state: RootState) => state.auth);
+  const { isLoading, error } = useAppSelector((state) => state.auth);
+  const { session } = useAppSelector((state) => state.session);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (session) {
+      router.replace('/dashboard');
+    }
+  }, [session, router]);
+
+  // Clear any existing errors when component mounts
+  useEffect(() => {
+    if (error) {
+      dispatch(clearError());
+    }
+  }, [dispatch, error]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await dispatch(requestPasswordReset(email)).unwrap();
+      await dispatch(requestForgotPassword(email)).unwrap();
       toast.success(
-        'If an account exists with this email, you will receive password reset instructions.'
+        'If an account exists with this email, you will receive password reset instructions.',
+        { duration: 5000 }
       );
-      router.push('/auth/signin');
+      router.replace('/auth/signin');
     } catch (error) {
-      if (error instanceof AuthError) {
-        toast.error(error.message);
-      } else if (error instanceof Error) {
-        toast.error(error.message);
-      } else if (typeof error === 'string') {
+      if (typeof error === 'string') {
         toast.error(error);
       } else {
         toast.error('Failed to send reset instructions');
@@ -45,7 +56,7 @@ export default function ForgotPassword() {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-600">
               Email address
             </label>
             <input
@@ -63,10 +74,15 @@ export default function ForgotPassword() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400"
             >
               {isLoading ? 'Sending...' : 'Send Reset Instructions'}
             </button>
+          </div>
+          <div className="text-center">
+            <Link href="/auth/signin" className="text-sm text-blue-600 hover:text-blue-500">
+              Back to sign in
+            </Link>
           </div>
         </form>
       </div>

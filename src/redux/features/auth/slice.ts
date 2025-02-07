@@ -6,6 +6,7 @@ import {
   resetPassword,
   resendVerificationEmail,
   signUpWithPassword,
+  requestForgotPassword,
 } from './thunks';
 
 export const initialState: AuthState = {
@@ -20,6 +21,8 @@ export const initialState: AuthState = {
   totpQR: undefined,
   isMFAEnabled: false,
   resetPasswordSuccess: false,
+  isSessionCleared: true,
+  isInPasswordResetFlow: false,
 };
 
 const authSlice = createSlice({
@@ -70,6 +73,7 @@ const authSlice = createSlice({
             }
           : null;
         state.requiresEmailVerification = false;
+        state.isSessionCleared = false;
         state.error = null;
       })
       .addCase(signInWithPassword.rejected, (state, action) => {
@@ -88,6 +92,7 @@ const authSlice = createSlice({
       .addCase(resetPassword.fulfilled, (state) => {
         state.isLoading = false;
         state.error = null;
+        state.isInPasswordResetFlow = false;
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
@@ -104,6 +109,21 @@ const authSlice = createSlice({
       .addCase(resendVerificationEmail.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      .addCase(requestForgotPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.isInPasswordResetFlow = true;
+      })
+      .addCase(requestForgotPassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+        state.isInPasswordResetFlow = true;
+      })
+      .addCase(requestForgotPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload ?? 'Failed to send reset instructions';
+        state.isInPasswordResetFlow = true;
       });
   },
 });

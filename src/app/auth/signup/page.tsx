@@ -1,23 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { signUpWithPassword, resendVerificationEmail } from '@/redux/features/auth';
+import { signUpWithPassword, resendVerificationEmail, clearError } from '@/redux/features/auth';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import type { SignInCredentials } from '@/redux/features/auth/types';
+import { useRouter } from 'next/navigation';
 
 export default function SignUp() {
   const dispatch = useAppDispatch();
   const { isLoading, error, requiresEmailVerification, email } = useAppSelector(
     (state) => state.auth
   );
+  const { session } = useAppSelector((state) => state.session);
+  const router = useRouter();
 
   const [formData, setFormData] = useState<SignInCredentials>({
     email: '',
     password: '',
     name: '',
   });
+
+  // Clear errors on mount
+  useEffect(() => {
+    if (error) {
+      dispatch(clearError());
+    }
+  }, [dispatch, error]);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (session) {
+      router.replace('/dashboard');
+    }
+  }, [session, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -33,9 +50,7 @@ export default function SignUp() {
       await dispatch(signUpWithPassword(formData)).unwrap();
       toast.success('Sign up successful! Please check your email to verify your account.');
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else if (typeof error === 'string') {
+      if (typeof error === 'string') {
         toast.error(error);
       } else {
         toast.error('Failed to register');

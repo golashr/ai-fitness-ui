@@ -1,3 +1,5 @@
+import { Session, User } from '@supabase/supabase-js';
+
 // Add types for user data
 interface UserProfile {
   id: string;
@@ -19,6 +21,8 @@ export interface AuthState {
   totpQR?: string;
   isMFAEnabled: boolean;
   resetPasswordSuccess: boolean;
+  isSessionCleared: boolean;
+  isInPasswordResetFlow: boolean;
 }
 
 export interface SignInCredentials {
@@ -30,4 +34,25 @@ export interface SignInCredentials {
 export interface OTPVerificationData {
   email: string;
   token: string;
+}
+
+export interface ThunkConfig {
+  rejectValue: string;
+}
+
+export interface AuthResponse {
+  user: User | null;
+  session: Session | null;
+}
+
+export interface TOTPVerifyResponse {
+  code: string;
+}
+
+export interface RequestPasswordResponse {
+  success: boolean;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
 }

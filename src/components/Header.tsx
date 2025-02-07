@@ -1,16 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAppSelector } from '@/redux/hooks';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { userDetails } = useAppSelector((state) => state.session);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Check if we're on reset password page
+  const isResetPasswordPage = pathname?.startsWith('/auth/reset-password');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -33,12 +37,15 @@ export default function Header() {
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
-            <Link href="/" className="flex items-center text-gray-900 font-medium text-lg">
+            <Link
+              href={userDetails ? '/dashboard' : '/'}
+              className="flex items-center text-gray-900 font-medium text-lg"
+            >
               AI Fitness
             </Link>
           </div>
           <div className="flex items-center space-x-4">
-            {userDetails ? (
+            {!isResetPasswordPage && userDetails ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -50,6 +57,7 @@ export default function Header() {
                         src={userDetails.avatar_url}
                         alt="Profile"
                         fill
+                        sizes="(max-width: 768px) 32px, 32px"
                         className="object-cover"
                       />
                     </div>

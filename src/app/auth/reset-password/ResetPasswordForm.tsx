@@ -1,15 +1,35 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { toast } from 'react-hot-toast';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { resetPassword } from '@/redux/features/auth';
+import toast from 'react-hot-toast';
 
 export default function ResetPasswordForm() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { isLoading } = useAppSelector((state) => state.auth);
+  const { session } = useAppSelector((state) => state.session);
+
+  // Check for valid reset token
+  useEffect(() => {
+    const token = searchParams?.get('token');
+    if (!token) {
+      toast.error('Invalid reset link');
+      router.replace('/auth/signin');
+    }
+  }, [searchParams, router]);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (session) {
+      router.replace('/dashboard');
+    }
+  }, [session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,24 +40,15 @@ export default function ResetPasswordForm() {
     }
 
     try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (error) throw error;
-
+      await dispatch(resetPassword(newPassword)).unwrap();
       toast.success('Password updated successfully. Please sign in with your new password.');
-      router.push('/auth/signin');
+      router.replace('/auth/signin');
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message || 'Failed to reset password');
+      if (typeof error === 'string') {
+        toast.error(error);
       } else {
-        toast.error('An unexpected error occurred');
+        toast.error('Failed to reset password');
       }
-      console.error('Reset password error:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -64,9 +75,11 @@ export default function ResetPasswordForm() {
                 name="newPassword"
                 type="password"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setNewPassword(e.target.value)
+                }
               />
             </div>
             <div>
@@ -81,9 +94,11 @@ export default function ResetPasswordForm() {
                 name="confirmPassword"
                 type="password"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setConfirmPassword(e.target.value)
+                }
               />
             </div>
           </div>

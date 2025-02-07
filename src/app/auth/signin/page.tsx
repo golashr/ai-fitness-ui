@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { signInWithPassword, setError, signOut } from '@/redux/features/auth';
+import { signInWithPassword, setError } from '@/redux/features/auth';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
@@ -14,22 +14,10 @@ export default function SignIn() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isLoading, error } = useAppSelector((state) => state.auth);
-  const { session } = useAppSelector((state) => state.session);
-  const [isRedirecting] = useState(false);
-
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  // const [otpCode] = useState('');
-
-  // Clear any existing session when landing on signin
-  useEffect(() => {
-    if (session) {
-      // Clear both auth and session states
-      dispatch(signOut());
-    }
-  }, [dispatch, session]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -43,7 +31,9 @@ export default function SignIn() {
     e.preventDefault();
     try {
       await dispatch(signInWithPassword(formData)).unwrap();
-      toast.success('Successfully signed in');
+      toast.success('Successfully signed in', {
+        duration: 5000,
+      });
       router.push('/dashboard');
     } catch (err) {
       if (typeof err === 'string' && (err.includes('network') || err.includes('system'))) {
@@ -52,18 +42,6 @@ export default function SignIn() {
     }
   };
 
-  // const handleOTPSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   try {
-  //     await dispatch(verifyOTP({ email: formData.email, token: otpCode })).unwrap();
-  //     toast.success('Successfully signed in!');
-  //     router.push('/dashboard');
-  //   } catch (err: any) {
-  //     console.log(`handleOTPSubmit error: ${err}`);
-  //     dispatch(setError(err.message));
-  //   }
-  // };
-
   const handleGoogleSignIn = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -71,6 +49,7 @@ export default function SignIn() {
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
         },
+        
       });
 
       if (error) throw error;
@@ -83,14 +62,12 @@ export default function SignIn() {
     }
   };
 
-  if (isLoading || isRedirecting) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100">
         <div className="animate-pulse text-center">
           <div className="h-12 w-12 mx-auto rounded-full bg-blue-400"></div>
-          <p className="mt-4 text-gray-600">
-            {isRedirecting ? 'Redirecting to dashboard...' : 'Loading...'}
-          </p>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
