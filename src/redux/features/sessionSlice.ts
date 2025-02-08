@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { User, Session } from '@supabase/supabase-js';
 
-interface SessionState {
+export interface SessionState {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
@@ -12,7 +12,7 @@ interface SessionState {
   } | null;
 }
 
-const initialState: SessionState = {
+export const initialState: SessionState = {
   user: null,
   session: null,
   isLoading: false,

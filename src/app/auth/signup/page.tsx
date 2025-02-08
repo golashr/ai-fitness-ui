@@ -188,7 +188,7 @@ export default function SignUp() {
           <div className="mt-6">
             <button
               onClick={handleGoogleSignUp}
-              className="w-full flex items-center justify-center gap-3 bg-white px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-center gap-3 bg-white px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-900"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path
