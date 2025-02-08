@@ -36,14 +36,18 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex">
+          <div className="flex items-center space-x-8">
             <Link
               href={userDetails ? '/dashboard' : '/'}
               className="flex items-center text-gray-900 font-medium text-lg"
             >
               AI Fitness
             </Link>
+            <Link href="/about" className="text-gray-600 hover:text-gray-900 transition-colors">
+              About
+            </Link>
           </div>
+
           <div className="flex items-center space-x-4">
             {!isResetPasswordPage && userDetails ? (
               <div className="relative" ref={dropdownRef}>

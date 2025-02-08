@@ -7,6 +7,9 @@ import { useAppSelector } from '@/redux/hooks';
 // Define public routes that don't require authentication
 const PUBLIC_ROUTES = [
   '/',
+  '/about',
+  '/terms',
+  '/privacy',
   '/auth/signin',
   '/auth/signup',
   '/auth/forgot-password',

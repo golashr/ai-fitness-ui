@@ -1,9 +1,10 @@
 'use client';
-import { Providers } from '@/redux/provider';
-import ClientLayout from '@/components/ClientLayout';
+import { useEffect } from 'react';
+import Footer from '@/components/Footer';
+import Header from '@/components/Header';
+import Providers from '@/providers/Providers';
 import { enableReactDebugging } from '@/utils/devtools';
 import './globals.css';
-import { useEffect } from 'react';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -14,7 +15,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen">
         <Providers>
-          <ClientLayout>{children}</ClientLayout>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <Footer />
+          </div>
         </Providers>
       </body>
     </html>
