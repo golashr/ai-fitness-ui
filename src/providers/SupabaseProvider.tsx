@@ -9,7 +9,6 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    console.log('SupabaseProvider initializing...');
     let lastKnownAuthState = false;
 
     // Set initial loading state
@@ -66,7 +65,6 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       } else {
         dispatch(clearSession());
       }
-
       dispatch(setLoading(false));
     });
 
