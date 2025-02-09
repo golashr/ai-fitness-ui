@@ -20,7 +20,7 @@ export default function ResetPasswordForm() {
     const token = searchParams?.get('token');
     if (!token) {
       toast.error('Invalid reset link');
-      router.replace('/auth/signin');
+      router.replace('/signin');
     }
   }, [searchParams, router]);
 
@@ -42,7 +42,7 @@ export default function ResetPasswordForm() {
     try {
       await dispatch(resetPassword(newPassword)).unwrap();
       toast.success('Password updated successfully. Please sign in with your new password.');
-      router.replace('/auth/signin');
+      router.replace('/signin');
     } catch (error) {
       if (typeof error === 'string') {
         toast.error(error);

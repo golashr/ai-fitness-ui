@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { createTestStore } from '@/tests/utils/mockStore';
-import SignUp from '@/app/auth/signup/page';
+import SignUp from '@/app/(auth)/signup/page';
 import { initialState } from '@/redux/features/auth/slice';
 import { AuthState } from '@/redux/features/auth/types';
 import { initialState as sessionInitialState, SessionState } from '@/redux/features/sessionSlice';

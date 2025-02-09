@@ -14,7 +14,7 @@ export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if we're on reset password page
-  const isResetPasswordPage = pathname?.startsWith('/auth/reset-password');
+  const isResetPasswordPage = pathname?.startsWith('/reset-password');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -28,7 +28,7 @@ export default function Header() {
   }, []);
 
   const handleSignOut = () => {
-    router.push('/auth/signout');
+    router.push('/signout');
     setIsDropdownOpen(false);
   };
 
@@ -100,7 +100,7 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <Link href="/auth/signin" className="text-gray-900 hover:text-gray-700 font-medium">
+              <Link href="/signin" className="text-gray-900 hover:text-gray-700 font-medium">
                 Sign In
               </Link>
             )}

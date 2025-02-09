@@ -65,7 +65,7 @@ export default function SignUp() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/verify`,
+          redirectTo: `${window.location.origin}/verify`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -215,7 +215,7 @@ export default function SignUp() {
 
         <p className="mt-4 text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link href="/auth/signin" className="text-blue-600 hover:text-blue-800">
+          <Link href="/signin" className="text-blue-600 hover:text-blue-800">
             Sign In
           </Link>
         </p>

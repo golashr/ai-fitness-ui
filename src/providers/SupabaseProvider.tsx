@@ -52,7 +52,7 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
 
       // Handle email verification flow
       if (!lastKnownAuthState && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-        if (window.location.pathname === '/auth/signin') {
+        if (window.location.pathname === '/signin') {
           dispatch(setLoading(false));
           return;
         }

@@ -16,7 +16,7 @@ export default function SignOut() {
 
   useEffect(() => {
     if (!session) {
-      router.replace('/auth/signin');
+      router.replace('/signin');
     }
   }, [session, router]);
 
@@ -24,7 +24,7 @@ export default function SignOut() {
     try {
       await dispatch(signOut()).unwrap();
       toast.success('Successfully signed out');
-      router.replace('/auth/signin');
+      router.replace('/signin');
     } catch (error) {
       if (error instanceof AuthError) {
         toast.error(error.message);

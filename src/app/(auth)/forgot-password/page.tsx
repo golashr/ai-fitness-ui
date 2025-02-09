@@ -36,7 +36,7 @@ export default function ForgotPassword() {
         'If an account exists with this email, you will receive password reset instructions.',
         { duration: 5000 }
       );
-      router.replace('/auth/signin');
+      router.replace('/signin');
     } catch (error) {
       if (typeof error === 'string') {
         toast.error(error);
@@ -80,7 +80,7 @@ export default function ForgotPassword() {
             </button>
           </div>
           <div className="text-center">
-            <Link href="/auth/signin" className="text-sm text-blue-600 hover:text-blue-500">
+            <Link href="/signin" className="text-sm text-blue-600 hover:text-blue-500">
               Back to sign in
             </Link>
           </div>

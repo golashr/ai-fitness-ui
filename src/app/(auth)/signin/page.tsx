@@ -49,7 +49,6 @@ export default function SignIn() {
         options: {
           redirectTo: `${window.location.origin}/dashboard`,
         },
-        
       });
 
       if (error) throw error;
@@ -115,7 +114,7 @@ export default function SignIn() {
             </div>
           )}
 
-          <Link href="/auth/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
+          <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
             Forgot your password?
           </Link>
 
@@ -147,7 +146,7 @@ export default function SignIn() {
 
         <p className="mt-4 text-center text-sm text-gray-600">
           Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" className="text-blue-600 hover:text-blue-800">
+          <Link href="/signup" className="text-blue-600 hover:text-blue-800">
             Sign up
           </Link>
         </p>

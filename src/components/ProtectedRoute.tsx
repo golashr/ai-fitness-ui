@@ -10,11 +10,11 @@ const PUBLIC_ROUTES = [
   '/about',
   '/terms',
   '/privacy',
-  '/auth/signin',
-  '/auth/signup',
-  '/auth/forgot-password',
-  '/auth/verify',
-  '/auth/reset-password',
+  '/signin',
+  '/signup',
+  '/forgot-password',
+  '/verify',
+  '/reset-password',
 ];
 
 interface ProtectedRouteProps {
@@ -33,7 +33,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     const type = searchParams?.get('type');
 
     if (token && type === 'recovery') {
-      router.replace(`/auth/reset-password?token=${token}`);
+      router.replace(`/reset-password?token=${token}`);
       return;
     }
 
@@ -44,7 +44,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     // For protected routes, redirect to signin if no session
     if (!isLoading && !session) {
-      router.replace('/auth/signin');
+      router.replace('/signin');
     }
   }, [session, isLoading, router, pathname, searchParams]);
 

@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import SignUp from '@/app/auth/signup/page';
+import SignUp from '@/app/(auth)/signup/page';
 import { createTestStore } from '@/tests/utils/mockStore';
 import { supabase } from '@/lib/supabase';
 import { initialState } from '@/redux/features/auth/slice';

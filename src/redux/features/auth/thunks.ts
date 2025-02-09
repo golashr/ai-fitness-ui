@@ -19,7 +19,7 @@ export const signUpWithPassword = createAsyncThunk<
       password,
       options: {
         data: { name },
-        emailRedirectTo: `${window.location.origin}/auth/verify`,
+        emailRedirectTo: `${window.location.origin}/verify`,
       },
     });
 
@@ -142,7 +142,7 @@ export const requestForgotPassword = createAsyncThunk<RequestPasswordResponse, s
   async (email: string, { rejectWithValue }) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
       return { success: true };
