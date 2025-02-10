@@ -1,11 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { supabase } from '@/lib/supabase';
-import type { SignInCredentials, OTPVerificationData, RequestPasswordResponse } from './types';
 import { AuthError } from '@supabase/supabase-js';
-import { clearSession, setSession } from '../sessionSlice';
-// import { initialState } from './slice';
+import type { SignInCredentials, OTPVerificationData, RequestPasswordResponse } from './types';
+import { clearSession, setSession } from './sessionSlice';
 import { ThunkConfig, AuthResponse, ResetPasswordResponse, TOTPVerifyResponse } from './types';
-import { setLoading } from '@/redux/features/sessionSlice';
+import { setLoading } from '@/redux/auth-session/sessionSlice';
 
 export const signUpWithPassword = createAsyncThunk<
   { email: string | undefined; requiresEmailVerification: boolean },
@@ -287,24 +286,34 @@ export const updateProfile = createAsyncThunk<
 
     if (userError || !user) throw new Error('User not found');
 
-    // Update auth metadata
-    const { error: metadataError } = await supabase.auth.updateUser({
+    // Update auth metadata with timeout
+    const updatePromise = supabase.auth.updateUser({
       data: {
         name: `${profileData.firstName} ${profileData.lastName}`,
-        language: `${profileData.language}`,
-        phone: profileData.phone,
+        language: profileData.language || 'en',
+        phone: profileData.phone || '',
       },
     });
 
-    if (metadataError) throw metadataError;
+    // Add a timeout of 5 seconds
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Update timeout')), 5000);
+    });
+
+    const response: Awaited<ReturnType<typeof supabase.auth.updateUser>> = await Promise.race([
+      updatePromise,
+      timeoutPromise,
+    ]);
+
+    if (response?.error) throw response?.error;
 
     // Update profile table
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
         name: `${profileData.firstName} ${profileData.lastName}`,
-        language: profileData.language,
-        phone: profileData.phone,
+        language: profileData.language || 'en',
+        phone: profileData.phone || '',
         updated_at: new Date().toISOString(),
       })
       .eq('id', user.id);
@@ -316,7 +325,7 @@ export const updateProfile = createAsyncThunk<
     if (error instanceof AuthError) {
       return rejectWithValue(error.message);
     }
-    return rejectWithValue('Failed to update profile');
+    return rejectWithValue(error instanceof Error ? error.message : 'Failed to update profile');
   } finally {
     dispatch(setLoading(false));
   }

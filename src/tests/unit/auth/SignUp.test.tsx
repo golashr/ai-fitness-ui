@@ -4,9 +4,8 @@ import { Provider } from 'react-redux';
 import SignUp from '@/app/(auth)/signup/page';
 import { createTestStore } from '@/tests/utils/mockStore';
 import { supabase } from '@/lib/supabase';
-import { initialState } from '@/redux/features/auth/slice';
-import { AuthState } from '@/redux/features/auth/types';
-import { initialState as sessionInitialState, SessionState } from '@/redux/features/sessionSlice';
+import { initialAuthState } from '@/redux/auth-session/types';
+import { AuthState, initialSessionState } from '@/redux/auth-session/types';
 
 // Mock dependencies
 jest.mock('@/lib/supabase', () => ({
@@ -38,8 +37,8 @@ jest.mock('next/navigation', () => ({
 
 describe('SignUp Component', () => {
   const mockStore = createTestStore({
-    auth: initialState as AuthState,
-    session: sessionInitialState as SessionState,
+    auth: initialAuthState,
+    session: initialSessionState,
   });
 
   beforeEach(() => {

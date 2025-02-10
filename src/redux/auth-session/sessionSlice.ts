@@ -1,29 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User, Session } from '@supabase/supabase-js';
-
-export interface SessionState {
-  user: User | null;
-  session: Session | null;
-  isLoading: boolean;
-  userDetails: {
-    avatar_url?: string;
-    email?: string;
-    name?: string;
-    language?: string;
-    phone?: string;
-  } | null;
-}
-
-export const initialState: SessionState = {
-  user: null,
-  session: null,
-  isLoading: false,
-  userDetails: null,
-};
+import { Session } from '@supabase/supabase-js';
+import { initialSessionState } from './types';
 
 const sessionSlice = createSlice({
   name: 'session',
-  initialState,
+  initialState: initialSessionState,
   reducers: {
     setSession: (state, action: PayloadAction<Session | null>) => {
       console.log('Setting session for user:', action.payload?.user?.email);

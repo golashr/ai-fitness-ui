@@ -3,11 +3,9 @@ import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { createTestStore } from '@/tests/utils/mockStore';
 import SignUp from '@/app/(auth)/signup/page';
-import { initialState } from '@/redux/features/auth/slice';
-import { AuthState } from '@/redux/features/auth/types';
-import { initialState as sessionInitialState, SessionState } from '@/redux/features/sessionSlice';
-import { authReducer } from '@/redux/features/auth';
-import sessionReducer from '@/redux/features/sessionSlice';
+import { AuthState, initialAuthState, initialSessionState } from '@/redux/auth-session/types';
+import { authReducer } from '@/redux/auth-session';
+import sessionReducer from '@/redux/auth-session/sessionSlice';
 import { configureStore } from '@reduxjs/toolkit';
 
 jest.mock('@/lib/supabase', () => ({
@@ -41,8 +39,8 @@ describe('Auth Flow Integration', () => {
   it('completes signup and verification flow', async () => {
     const user = userEvent.setup();
     const mockStore = createTestStore({
-      auth: initialState as AuthState,
-      session: sessionInitialState as SessionState,
+      auth: initialAuthState,
+      session: initialSessionState,
     });
 
     const { rerender } = render(
@@ -64,11 +62,11 @@ describe('Auth Flow Integration', () => {
       },
       preloadedState: {
         auth: {
-          ...initialState,
+          ...initialAuthState,
           requiresEmailVerification: false,
           email: 'test@example.com',
         },
-        session: sessionInitialState,
+        session: initialSessionState,
       },
     });
 

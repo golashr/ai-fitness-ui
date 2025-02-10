@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { signInWithPassword, setError } from '@/redux/features/auth';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 import { AuthError } from '@supabase/supabase-js';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { signInWithPassword, setError } from '@/redux/auth-session';
 
 export default function SignIn() {
   const router = useRouter();

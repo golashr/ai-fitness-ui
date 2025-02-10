@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import toast from 'react-hot-toast';
-import { signOut } from '@/redux/features/auth';
+import { signOut } from '@/redux/auth-session';
 import { AuthError } from '@supabase/supabase-js';
 
 export default function SignOut() {

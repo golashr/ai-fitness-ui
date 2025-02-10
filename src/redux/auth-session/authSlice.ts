@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { AuthState } from './types';
+import { initialAuthState } from './types';
 import {
   signInWithPassword,
   signOut,
@@ -9,25 +9,9 @@ import {
   requestForgotPassword,
 } from './thunks';
 
-export const initialState: AuthState = {
-  user: null,
-  isLoading: false,
-  error: null,
-  isSignedUp: false,
-  requiresEmailVerification: false,
-  mfaRequired: false,
-  email: null,
-  totpSecret: undefined,
-  totpQR: undefined,
-  isMFAEnabled: false,
-  resetPasswordSuccess: false,
-  isSessionCleared: true,
-  isInPasswordResetFlow: false,
-};
-
 const authSlice = createSlice({
   name: 'auth',
-  initialState,
+  initialState: initialAuthState,
   reducers: {
     setError: (state, action) => {
       state.error = action.payload;
@@ -83,7 +67,7 @@ const authSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(signOut.fulfilled, () => {
-        return initialState;
+        return initialAuthState;
       })
       .addCase(resetPassword.pending, (state) => {
         state.isLoading = true;

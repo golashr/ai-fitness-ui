@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useAppDispatch } from '@/redux/hooks';
 import { supabase } from '@/lib/supabase';
-import { setSession, clearSession, setLoading } from '@/redux/features/sessionSlice';
+import { setSession, clearSession, setLoading } from '@/redux/auth-session/sessionSlice';
 import { getProfile } from '@/lib/profile';
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {

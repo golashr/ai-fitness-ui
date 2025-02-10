@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { authReducer } from '@/redux/features/auth';
+import { authReducer } from '@/redux/auth-session';
 import type { RootState } from '@/redux/store';
-import sessionReducer from '@/redux/features/sessionSlice';
+import sessionReducer from '@/redux/auth-session/sessionSlice';
 
 export const createTestStore = (preloadedState?: Partial<RootState>) => {
   return configureStore({

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { resetPassword } from '@/redux/features/auth/thunks';
+import { resetPassword } from '@/redux/auth-session/thunks';
 import toast from 'react-hot-toast';
 import { AuthError } from '@supabase/supabase-js';
 

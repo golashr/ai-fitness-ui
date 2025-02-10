@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { resetPassword } from '@/redux/features/auth';
+import { resetPassword } from '@/redux/auth-session';
 import toast from 'react-hot-toast';
 
 export default function ResetPasswordForm() {

@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { signUpWithPassword, resendVerificationEmail, clearError } from '@/redux/features/auth';
+import { signUpWithPassword, resendVerificationEmail, clearError } from '@/redux/auth-session';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import type { SignInCredentials } from '@/redux/features/auth/types';
+import type { SignInCredentials } from '@/redux/auth-session/types';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { AuthError } from '@supabase/supabase-js';

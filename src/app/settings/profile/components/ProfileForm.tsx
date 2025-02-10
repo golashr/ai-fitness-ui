@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useAppSelector, useAppDispatch } from '@/redux/hooks';
 import toast from 'react-hot-toast';
-import { updateProfile } from '@/redux/features/auth/thunks';
+import { useAppSelector, useAppDispatch } from '@/redux/hooks';
+import { updateProfile } from '@/redux/auth-session/thunks';
 
 const LANGUAGES = [
   { code: 'en', name: 'English' },
@@ -44,7 +44,7 @@ export default function ProfileForm() {
       ).unwrap();
       toast.success('Profile updated successfully');
     } catch (error) {
-      toast.error('Failed to update profile');
+      toast.error(`Failed to update profile: ${error}`);
     } finally {
       setIsLoading(false);
     }

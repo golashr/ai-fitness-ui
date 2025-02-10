@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { requestForgotPassword, clearError } from '@/redux/features/auth';
+import { requestForgotPassword, clearError } from '@/redux/auth-session';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
