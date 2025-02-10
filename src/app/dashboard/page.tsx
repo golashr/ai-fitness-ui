@@ -10,7 +10,7 @@ export default function Dashboard() {
   return (
     <Suspense>
       <ProtectedRoute>
-        <div className="min-h-screen bg-gray-100 p-8 text-gray-900">
+        <div className="min-h-screen bg-white p-8">
           <h1 className="text-2xl font-bold mb-4 text-gray-900">AI Fitness Dashboard</h1>
           <p className="text-gray-900">Welcome {userDetails?.name || userDetails?.email}</p>
         </div>

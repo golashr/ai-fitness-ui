@@ -14,7 +14,7 @@ export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if we're on reset password page
-  const isResetPasswordPage = pathname?.startsWith('/reset-password');
+  const isResetPasswordPage = pathname?.startsWith('/auth/reset-password');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -33,18 +33,9 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center space-x-8">
-            <Link
-              href={userDetails ? '/dashboard' : '/'}
-              className="flex items-center text-gray-900 font-medium text-lg"
-            >
-              AI Fitness
-            </Link>
-          </div>
-
+    <header className="sticky top-0 bg-white border-b border-gray-200">
+      <nav className="px-4">
+        <div className="flex justify-end h-16">
           <div className="flex items-center space-x-4">
             {!isResetPasswordPage && userDetails ? (
               <div className="relative" ref={dropdownRef}>
