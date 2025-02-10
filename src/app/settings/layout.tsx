@@ -16,8 +16,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
 
   return (
     <ProtectedRoute>
-      <div className="p-8 text-gray-900 bg-white">
-        <div className="max-w-7xl mx-auto">
+      <div className="p-6 text-gray-900 bg-white">
+        <div className="max-w-10xl mx-auto">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
               {navigation.map((item) => {

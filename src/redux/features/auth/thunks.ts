@@ -272,3 +272,52 @@ export const resendVerificationEmail = createAsyncThunk<{ success: boolean }, st
     }
   }
 );
+
+export const updateProfile = createAsyncThunk<
+  { success: boolean },
+  { language?: string; phone?: string; firstName: string; lastName: string },
+  ThunkConfig
+>('auth/updateProfile', async (profileData, { dispatch, rejectWithValue }) => {
+  try {
+    dispatch(setLoading(true));
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) throw new Error('User not found');
+
+    // Update auth metadata
+    const { error: metadataError } = await supabase.auth.updateUser({
+      data: {
+        name: `${profileData.firstName} ${profileData.lastName}`,
+        language: `${profileData.language}`,
+        phone: profileData.phone,
+      },
+    });
+
+    if (metadataError) throw metadataError;
+
+    // Update profile table
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        name: `${profileData.firstName} ${profileData.lastName}`,
+        language: profileData.language,
+        phone: profileData.phone,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id);
+
+    if (profileError) throw profileError;
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return rejectWithValue(error.message);
+    }
+    return rejectWithValue('Failed to update profile');
+  } finally {
+    dispatch(setLoading(false));
+  }
+});

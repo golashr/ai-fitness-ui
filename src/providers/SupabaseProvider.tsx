@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useAppDispatch } from '@/redux/hooks';
 import { supabase } from '@/lib/supabase';
 import { setSession, clearSession, setLoading } from '@/redux/features/sessionSlice';
+import { getProfile } from '@/lib/profile';
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -61,7 +62,25 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
       lastKnownAuthState = !!session;
 
       if (session) {
-        dispatch(setSession(session));
+        try {
+          const profile = await getProfile();
+          dispatch(
+            setSession({
+              ...session,
+              user: {
+                ...session.user,
+                user_metadata: {
+                  ...session.user.user_metadata,
+                  language: profile.language,
+                  phone: profile.phone,
+                },
+              },
+            })
+          );
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+          dispatch(setSession(session));
+        }
       } else {
         dispatch(clearSession());
       }

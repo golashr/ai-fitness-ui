@@ -9,6 +9,8 @@ export interface SessionState {
     avatar_url?: string;
     email?: string;
     name?: string;
+    language?: string;
+    phone?: string;
   } | null;
 }
 
@@ -32,6 +34,8 @@ const sessionSlice = createSlice({
           avatar_url: action.payload.user.user_metadata?.avatar_url,
           email: action.payload.user.email,
           name: action.payload.user.user_metadata?.full_name,
+          language: action.payload.user.user_metadata?.language,
+          phone: action.payload.user.user_metadata?.phone,
         };
       }
       state.isLoading = false;

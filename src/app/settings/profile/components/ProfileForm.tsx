@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/redux/hooks';
 import toast from 'react-hot-toast';
+import { updateProfile } from '@/redux/features/auth/thunks';
 
 const LANGUAGES = [
   { code: 'en', name: 'English' },
   { code: 'es', name: 'Español' },
   { code: 'fr', name: 'Français' },
   { code: 'de', name: 'Deutsch' },
+  { code: 'hi', name: 'Hindi' },
 ];
 
 export default function ProfileForm() {
@@ -32,8 +34,14 @@ export default function ProfileForm() {
     setIsLoading(true);
 
     try {
-      // TODO: Add update profile action
-      // await dispatch(updateProfile(formData)).unwrap();
+      await dispatch(
+        updateProfile({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          language: formData.language,
+          phone: formData.phone,
+        })
+      ).unwrap();
       toast.success('Profile updated successfully');
     } catch (error) {
       toast.error('Failed to update profile');
